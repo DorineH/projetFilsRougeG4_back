@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        /* CSS */
+    </style>
+</head>
+<body>
+    <h1>Chat</h1>
+    <div id="chat-box">
+        <!-- message affiché ici  -->
+    </div>
+    <form id="message-form">
+        <!-- <ul id="messages"></ul> -->
+        <input type="text" id="message_input" placeholder="Enter your message" />
+        <button type="submit">Send</button> 
+        <!-- onclick="sendMessage()" -->
+    </form>
+    <script>
+        // // WebSocket connection
+        // var ws = new WebSocket("ws://" + window.location.host + "/");
+        // ws.onopen = function() {
+        //    ws.send("socket open");
+        // };
+        // // ws.onclose = function(evt) {
+        // //    alert("socket closed");
+        // // };
+        // ws.onmessage = function(event) {
+        //     var message_ul = document.getElementById("message");
+        //     message_ul.innerHTML += "<li>" + event.data + "</li>";
+        // };
+
+        // function sendMessage() {
+        //     var message_input = document.getElementById("message_input");
+        //     ws.send(message_input.value);
+        //     message_input.value = "";
+        // }
+          // JavaScript pour gérer l'envoi de messages via AJAX et afficher les messages reçus
+        const form = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const chatBox = document.getElementById('chat-box');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const message = messageInput.value.trim();
+            if (message !== '') {
+                sendMessage(message);
+                messageInput.value = '';
+            }
+        });
+
+        function sendMessage(message) {
+            fetch('/send_message', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    message: message
+                }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'OK') {
+                    // Message envoyé avec succès
+                } else {
+                    // Gérer les erreurs
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Fonction pour afficher les messages reçus
+        function displayMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+        }
+
+        // Rafraîchissement automatique de la liste des messages
+        function refreshMessages() {
+            fetch('/messages')
+            .then(response => response.json())
+            .then(data => {
+                chatBox.innerHTML = ''; // Efface les anciens messages
+                data.messages.forEach(displayMessage);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Rafraîchit la liste des messages toutes les 5 secondes
+        setInterval(refreshMessages, 8888);
+
+        // Charge les messages initiaux
+        refreshMessages();
+    </script>
+</body>
+</html>

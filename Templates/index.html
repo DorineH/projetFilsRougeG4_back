@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Chat</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js" integrity="sha512-luMnTJZ7oEchNDZAtQhgjomP1eZefnl82ruTH/3Oj/Yu5qYtwL7+dVRccACS/Snp1lFXq188XFipHKYE75IaQQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    </head>
+    <body>
+        <h1>Messagerie</h1>
+        <div id="chat-box" style="display: none;">
+            <!-- Les messages seront affichés ici -->
+        </div>
+        <form id="message-form" style="display: none;">
+            <input type="text" id="message-input" placeholder="Enter your message">
+            <button type="submit">Send</button>
+        </form>            
+        <button id="exit-button" style="display: none;">Exit</button>
+    <script>
+       const socket = io();
+
+       let username;
+       while (!username) {
+            username = prompt('Enter your username: ');
+       }
+       socket.emit('join', { username: username });
+
+       socket.on('message', function(data) {
+            displayMessage(data.username + ': ' + data.message);
+       });
+
+       socket.on('user_joined', function(data) {
+            displayMessage(data.username + ' joined the chat !!');
+       });
+
+       socket.on('user_left', function(data) {
+            displayMessage(data.username + ' left the chat !!');
+       });
+
+       socket.on('connect', function() {
+            document.getElementById('chat-box').style.display = 'block';
+            document.getElementById('message-form').style.display = 'block';
+            document.getElementById('exit-button').style.display = 'block';
+       });
+
+       const form = document.getElementById('message-form');
+       const messageInput = document.getElementById('message-input');
+       const chatBox = document.getElementById('chat-box');
+       const exitButton = document.getElementById('exit-button');
+
+       form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const message = messageInput.value.trim();
+            if (message !== '') {
+                sendMessage(message);
+                messageInput.value = '';
+            }
+       });
+
+       exitButton.addEventListener('click', function() {
+            socket.emit('leave', { username: username });
+            window.location.reload(); // à remplcer par la futur page d'acceuil
+       });
+
+       function sendMessage(message) {
+            socket.emit('message', { username: username, message: message });
+       }
+
+       function displayMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+       }
+    </script>
+</body>
+</html>
