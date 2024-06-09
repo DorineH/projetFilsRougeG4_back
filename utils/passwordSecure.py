@@ -5,7 +5,6 @@ password = ''
 
 def password_secure(password):
     while True:
-        # password = input("Entrez un mot de passe :")
         print(password)
         if len(password) < 8:
             print("Le mot de passe doit contenir au moins 8 caractère")
@@ -20,7 +19,7 @@ def password_secure(password):
                 maj = True
                 break
         if not maj:
-            print("Le mot de passe doit contenir au moin une majuscule")
+            print("Le mot de passe doit contenir au moins une majuscule")
             return False
 
         for i in password:
@@ -41,12 +40,6 @@ def password_secure(password):
 
         print("Le mot de passe est valide")
         return True
-
-        # confirmation = input("Entrez une deuxiéme fois le même mot de passe : ")
-        # if confirmation == password:
-        #     print("Mot de passe correct")
-        #     break
-        # print("Les deux mots de passe ne correspondent pas")
 
 if __name__ == '__main__':
     password_secure(password=password)
