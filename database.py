@@ -26,7 +26,7 @@ def get_db_connection():
 
 resultsExportUsers = []
 
-# Récupperer un utilisateur par son nom 
+# Récuperer un utilisateur par son nom (mongoDB OK)
 def get_user_by_pseudo(pseudo):
     print('getUserByPseudo')
     db_connection = get_db_connection()
@@ -49,7 +49,7 @@ def get_user_by_pseudo(pseudo):
         cursor.close()
         db_connection.close()
  
-#  Récupper tous les utilisateurs de la base de donnée
+#  Récupper tous les utilisateurs de la base de donnée (mongoDB OK)
 def getUsers():
     print('getUsers')
     db_connection = get_db_connection()
@@ -100,3 +100,10 @@ def createUser(user):
     finally:
         cursor.close()
         connection.close()
+
+# Récupere le score avec le pseudo
+# def get_scores_by_pseudo():
+
+# Sauvegardes les scores
+# def save_score():
+
