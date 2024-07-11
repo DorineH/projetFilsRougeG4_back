@@ -1,5 +1,5 @@
 import warnings
-import database
+# import database
 import subprocess
 import dataBaseMongoDb
 # import pygame
@@ -34,13 +34,21 @@ def get_users():
 
     return jsonify({'users': result}), 201
 
-# récupere un user en fonction de son pseudo (mongoDB OK)
-@app.route('/api/v1.0/user/<string:pseudo>', methods=['GET'])
-def get_user_by_pseudo(pseudo):
+# Récupere un user en fonction de son pseudo (mongoDB OK)
+@app.route('/api/v1.0/user', methods=['GET'])
+def get_user_by_pseudo():
+    if 'pseudo' in request.args:
+        print('777777777777') # ne vois pas le print
+        pseudo = request.args['pseudo']
+        print(pseudo) # ne vois pas le print
+    else:
+        return jsonify({'Error': 'No pseudo found'}), 400
     # result = database.get_user_by_pseudo(pseudo)
     result = dataBaseMongoDb.getUserByPseudo(pseudo)
+    print('result', result)
     if result: 
-        return jsonify({'user': result}), 201
+        print('11111111111111')
+        return jsonify({'user': result}), 200
     else: 
         return jsonify({'message': 'Utilisateur non trouvé'}), 404
 
@@ -80,7 +88,7 @@ def signup_user():
 @app.route('/api/v1.0/login', methods=['POST'])
 def login_user():
     data = request.get_json() #  {password: 'passwordDodo!13', pseudo: 'DodoTheBest'}
-    prenom = data.get('prenom')
+    # prenom = data.get('prenom')
     pseudo = data.get('pseudo')
     password = data.get('password')
 
@@ -110,7 +118,7 @@ def login_user():
 #     database.createUser(data)
 #     return jsonify({'item': 'User created !'}), 201
 
-# fonctionne du jeu snake 
+# fonction du jeu snake 
 @app.route('/api/v1.0/launchSnake', methods=['GET'])
 def launch_snake():
     try:
@@ -119,7 +127,7 @@ def launch_snake():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# fonctionne pour enregister le score du joueur
+# fonction pour enregister le score du joueur
 @app.route('/api/v1.0/score', methods=['POST'])
 def post_score():
     data = request.get_json()
@@ -129,16 +137,25 @@ def post_score():
     if not pseudo or not score:
         return jsonify({'error': 'Invalid'}), 400
     
-    database.save_score(pseudo, score)
+    # database.save_score(pseudo, score)
+    dataBaseMongoDb.saveScore(pseudo, score)
 
     return jsonify({'status': 'success', 'score_received': score})
 
 # fonction pour récupper les scores
-@app.route('/api/v1.0/score/<string:pseudo>', methods=['GET'])
-def get_scores_by_by_pseudo(pseudo):
-    scores = database.get_scores_by_pseudo(pseudo)
-    if scores:
-        return jsonify({'scores': scores}), 200
+@app.route('/api/v1.0/scores', methods=['GET'])
+def get_scores_by_by_pseudo():
+    if 'pseudo' in request.args:
+        pseudo = request.args['pseudo']
+    else:
+        return jsonify({'Error': 'No pseudo found'}), 400
+    # scores = database.get_scores_by_pseudo(pseudo)
+    result = dataBaseMongoDb.getScoresByPseudo(pseudo)
+    print('result22222222222', result) # affiche none dans la console
+
+    if result:
+        print('result333333333333', result)
+        return jsonify({'scores': result}), 200
     else:
         return jsonify({'message': 'Aucun score trouvé pour cet utilisateur'}), 404
 

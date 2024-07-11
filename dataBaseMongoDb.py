@@ -1,8 +1,9 @@
 import pymongo
+from datetime import datetime
 
 resultsExportUsers = []
 
-#  connection à la base de donnée mongoDB
+#  Connection à la base de donnée mongoDB
 def get_db_connection():
     try:
         uri = "mongodb://localhost:27017/"
@@ -49,7 +50,7 @@ def getUsersMongoDB():
         db_connection.client.close()
 
 
-# Récuperer un utilisateur par son nom 
+# Récuperer un utilisateur par son nom  # MongoDB ok
 def getUserByPseudo(pseudo):
     print('getUserByPseudo')
     db_connection = get_db_connection()
@@ -58,11 +59,13 @@ def getUserByPseudo(pseudo):
         return None
     
     mycollection = db_connection["users"]
+    print('mycollection get user by pseudo ')
+    print(mycollection)
    
     try:
         myquery = { "pseudo": pseudo }
         result = mycollection.find_one(myquery)
-        print(result)
+        print('result ', result)
 
         if result:
             return {
@@ -74,7 +77,7 @@ def getUserByPseudo(pseudo):
         return None
     
     except Exception as e:
-        print("MongoDB Error: {e}" )
+        print("MongoDB get user by pseudo Error: ", {e})
         return None
     finally:
         db_connection.client.close()
@@ -106,14 +109,77 @@ def createUserMongoDB(user):
     finally:
         db_connection.client.close()
 
+# Enregistrement des scores
+def saveScore(pseudo, score):
+    print('saveScore')
+    db_connection = get_db_connection()
+    print('db_connection ', db_connection)
+
+    if db_connection is None:
+        return None
+    
+    mycollection = db_connection["scores"]
+
+    try: 
+        myquery = {
+            "pseudo": pseudo,
+            "score": score,
+            "date": datetime.utcnow()
+        }
+        result = mycollection.insert_one(myquery) 
+        return result
+    except Exception as e:
+        print("MongoDB save score Error: ", {e} )
+        return None
+    finally:
+        db_connection.client.close()
+
+#  Récupere les scores
+def getScoresByPseudo(pseudo):
+    print('getScoresByPseudo')  # print  ici
+    db_connection = get_db_connection()
+    print('db_connection ', db_connection) # print  ici
+    print(pseudo) # print  ici
+
+    if db_connection is None:
+        return None
+    
+    mycollection = db_connection["scores"]
+    print('mycollection get score by pseudo ') # print  ici
+    print(mycollection) # print  ici
+
+    try: 
+        myquery = {"pseudo": pseudo}
+        print(myquery) # print  ici
+        scores_by_pseudo = list(mycollection.find(myquery))
+        # for u in list(mycollection.find(myquery)):
+        #     print(u)
+        if scores_by_pseudo:
+            scores_list = []
+            for score in scores_by_pseudo:
+                scores_list.append({
+                    "pseudo": score.get("pseudo", ""),
+                    "score": score.get("score", ""),
+                    "date": score.get("date", "")
+                })
+            return scores_list
+        return None
+    
+    except Exception as e:
+        print("MongoDB get scores by pseudo Error: ", {e} )
+        return None
+    finally:
+        db_connection.client.close()
 
 
-# test pour lancer les fonctions seul
+
+# test pour lancer les fonctions seuls
 # getUsersMongoDB()
 
-# pseudo = 'DodoTheBest'
-# user = getUserByPseudo(pseudo)
-# print(user)
+pseudo = 'DodoTheBest'
+user = getUserByPseudo(pseudo)
+print('55555555555555') # ok
+print(user) # ok 
 
 # newUser = { "prenom": "Jean", "nom": "Dupont", "pseudo": "jeanD", "password": "passwordJean!11" }
 # userCreated = createUserMongoDB(newUser)
@@ -121,4 +187,13 @@ def createUserMongoDB(user):
 
 # print('ffffffffffffffffff')
 # print(resultsExportUsers)
+
+# pseudo = 'DodoTheBest'
+# score = '10'
+# x = getScoresByPseudo(pseudo)
+# y = saveScore(pseudo, score)
+# print('rrrrrrrrrrrrrrrrrrrr')
+# print(x)
+# print(y)
+
 
