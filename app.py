@@ -9,12 +9,15 @@ from flask import Flask, jsonify, request
 from utils.passwordHash import hash_password, check_password
 from utils.passwordSecure import password_secure
 from flask_cors import CORS
+from flask_socketio import SocketIO, send
 
 warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Y1EcJXSDSEryUwSpmFet' 
 CORS(app)
+
+socketIo = SocketIO(app, cors_allowed_origins="*")
 
 # server_session = Session(app)
 
@@ -141,6 +144,12 @@ def get_scores_by_by_pseudo(pseudo):
         return jsonify({'scores': scores}), 200
     else:
         return jsonify({'message': 'Aucun score trouvé pour cet utilisateur'}), 404
+    
+@socketIo.on("message")
+def handleMessage(msg):
+    print(msg)
+    send(msg, broadcast=True)
+    return None
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketIo.run(app, debug=True)
