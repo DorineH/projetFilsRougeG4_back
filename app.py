@@ -2,6 +2,7 @@ import warnings
 # import database
 import subprocess
 import dataBaseMongoDb
+import json
 # import pygame
 
 # from flask_session import Session
@@ -121,7 +122,7 @@ def login_user():
 #     database.createUser(data)
 #     return jsonify({'item': 'User created !'}), 201
 
-# fonction du jeu snake 
+# Fonction pour lancer le jeu snake 
 @app.route('/api/v1.0/launchSnake', methods=['GET'])
 def launch_snake():
     try:
@@ -145,7 +146,7 @@ def post_score():
 
     return jsonify({'status': 'success', 'score_received': score})
 
-# fonction pour récupper les scores
+# Fonction pour récuperer les scores à partir d'un pseudo
 @app.route('/api/v1.0/scores', methods=['GET'])
 def get_scores_by_by_pseudo():
     if 'pseudo' in request.args:
@@ -157,11 +158,37 @@ def get_scores_by_by_pseudo():
     print('result22222222222', result) # affiche none dans la console
 
     if result:
-        print('result333333333333', result)
         return jsonify({'scores': result}), 200
     else:
         return jsonify({'message': 'Aucun score trouvé pour cet utilisateur'}), 404
     
+
+# Fonction pour récuper le score du json du jeu snake
+@app.route('/api/v1.0/get_snake_score', methods=['POST'])
+def get_snake_score():
+    try:
+        with open("snake_score.json", "r") as score_file:
+                  score_data = json.load(score_file)
+
+        score = score_data.get("score")
+        pseudo = request.json.get("pseudo")
+
+        if request.is_json:
+            data = request.get_json()
+            pseudo = data.get('pseudo')
+            score = data.get('score')
+
+        if not pseudo or score is None:
+            return jsonify({'error': 'Invalid data'}), 400
+        
+        dataBaseMongoDb.saveScore(pseudo, score)
+
+        return jsonify({'status': 'succes', 'score': score}), 200
+    
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 @socketIo.on("message")
 def handleMessage(msg):
     print(msg)

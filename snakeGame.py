@@ -1,6 +1,8 @@
 import pygame
 import random
 import logging
+import os
+import json
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -24,7 +26,7 @@ food_images = [cherry_img, apple_img, banana_img]
 # Colors
 black = (0, 0, 0)
 white = (255, 255, 255)
-green = (0, 255, 0)
+purple = (128, 0, 128)
 red = (255, 0, 0)
 
 # Snake properties
@@ -59,10 +61,14 @@ def game_over():
     game_over_rect.midtop = (width/2, height/4)
     screen.blit(game_over_surface, game_over_rect)
     pygame.display.flip()
-    pygame.quit()
+    # pygame.quit()
     pygame.time.wait(2000)
-      
-    quit()
+    pygame.quit()
+
+    with open("snake_score.json", "w") as score_file:
+        json.dump({"score": score}, score_file)
+
+    os._exit(0)    
   
 # Draw Food function
 def draw_food():
@@ -126,7 +132,7 @@ while True:
     # Draw Snake
     screen.fill(black)
     for pos in snake_body:
-        pygame.draw.rect(screen, green, pygame.Rect(pos[0], pos[1], 10, 10))
+        pygame.draw.rect(screen, purple, pygame.Rect(pos[0], pos[1], 10, 10))
         
     # Draw Food
     #pygame.draw.rect(screen, white, pygame.Rect(food_pos[0], food_pos[1], 10, 10))
